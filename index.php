@@ -1,29 +1,18 @@
 <?php
 
 require 'functions.php';
+// require 'router.php';
+require 'Database.php';
 
-// Strip Laragon folder from request URI super global for clarity in routes array
-$requestUri = str_replace('/phpforbeginners', '', $_SERVER['REQUEST_URI']);
+$config = require 'config.php';
+$db = new Database($config['database']);
 
-$uri = parse_url($requestUri)['path'];
+$id = $_GET['id'];
+$query = "select * from posts where id = ?";
 
-$routes = [
-    '/' => 'controllers/index.php',
-    '/about' => 'controllers/about.php',
-    '/contact' => 'controllers/contact.php',
-];
+$posts = $db->query($query, [$id])->fetchAll();
 
-function routeToController($uri, $routes) {
-    if(!array_key_exists($uri, $routes)) {
-        abort();
-    }
-    require $routes[$uri];
+
+foreach ($posts as $post) {
+    echo '<li>' . $post['title'] . '</li>';
 }
-
-function abort($code = 404) {
-    http_response_code($code);
-    require "views/{$code}.php";
-    die();
-}
-
-routeToController($uri, $routes);
